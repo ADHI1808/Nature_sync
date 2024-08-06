@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_tflite/flutter_tflite.dart'; // Ensure Tflite is correctly imported
 import 'dart:developer' as devtools;
-import 'package:flutter_tflite/flutter_tflite.dart';
 
 class LeafScanner extends StatefulWidget {
   const LeafScanner({super.key});
@@ -16,201 +16,174 @@ class _LeafScannerState extends State<LeafScanner> {
   String label = '';
   double confidence = 0.0;
 
-  Future<void> _tfLteInit() async {
-    String? res = await Tflite.loadModel(
+  @override
+  void initState() {
+    super.initState();
+    _initializeTfLite();
+  }
+
+  Future<void> _initializeTfLite() async {
+    try {
+      await Tflite.loadModel(
         model: "assets/internml.tflite",
         labels: "assets/labels.txt",
-        numThreads: 1, // defaults to 1
-        isAsset: true, // defaults to true, set to false to load resources outside assets
-        useGpuDelegate: false // defaults to false, set to true to use GPU delegate
-    );
+        numThreads: 1,
+        isAsset: true,
+        useGpuDelegate: false,
+      );
+    } catch (e) {
+      devtools.log("Failed to load model: $e");
+    }
   }
 
-  Future<void> pickImageGallery() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: source);
 
     if (image == null) return;
 
-    var imageMap = File(image.path);
+    final imageFile = File(image.path);
 
     setState(() {
-      filePath = imageMap;
+      filePath = imageFile;
     });
 
-    var recognitions = await Tflite.runModelOnImage(
-        path: image.path, // required
-        imageMean: 0.0, // defaults to 117.0
-        imageStd: 255.0, // defaults to 1.0
-        numResults: 2, // defaults to 5
-        threshold: 0.2, // defaults to 0.1
-        asynch: true // defaults to true
-    );
-
-    if (recognitions == null) {
-      devtools.log("recognitions is Null");
-      return;
-    }
-    devtools.log(recognitions.toString());
-    setState(() {
-      confidence = (recognitions[0]['confidence'] * 100);
-      label = recognitions[0]['label'].toString();
-    });
+    _classifyImage(image.path);
   }
 
-  Future<void> pickImageCamera() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+  Future<void> _classifyImage(String path) async {
+    try {
+      final recognitions = await Tflite.runModelOnImage(
+        path: path,
+        imageMean: 0.0,
+        imageStd: 255.0,
+        numResults: 2,
+        threshold: 0.2,
+        asynch: true,
+      );
 
-    if (image == null) return;
+      if (recognitions == null) {
+        devtools.log("No recognitions found");
+        return;
+      }
 
-    var imageMap = File(image.path);
-
-    setState(() {
-      filePath = imageMap;
-    });
-
-    var recognitions = await Tflite.runModelOnImage(
-        path: image.path, // required
-        imageMean: 0.0, // defaults to 117.0
-        imageStd: 255.0, // defaults to 1.0
-        numResults: 2, // defaults to 5
-        threshold: 0.2, // defaults to 0.1
-        asynch: true // defaults to true
-    );
-
-    if (recognitions == null) {
-      devtools.log("recognitions is Null");
-      return;
+      devtools.log(recognitions.toString());
+      setState(() {
+        confidence = (recognitions[0]['confidence'] * 100);
+        label = recognitions[0]['label'].toString();
+      });
+    } catch (e) {
+      devtools.log("Failed to classify image: $e");
     }
-    devtools.log(recognitions.toString());
-    setState(() {
-      confidence = (recognitions[0]['confidence'] * 100);
-      label = recognitions[0]['label'].toString();
-    });
   }
 
   @override
   void dispose() {
-    super.dispose();
     Tflite.close();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _tfLteInit();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Leaf Scan"),centerTitle: true,
+        title: const Text("Leaf Scan"),
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 12,
-              ),
-              Card(
-                elevation: 20,
-                clipBehavior: Clip.hardEdge,
-                child: SizedBox(
-                  width: 300,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        const SizedBox(
-                          height: 18,
-                        ),
-                        Container(
-                          height: 280,
-                          width: 280,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            image: const DecorationImage(
-                              image: AssetImage('assets/upload.jpg'),
-                            ),
-                          ),
-                          child: filePath == null
-                              ? const Text('')
-                              : Image.file(
-                            filePath!,
-                            fit: BoxFit.fill,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 12,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              Text(
-                                label,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 12,
-                              ),
-                              Text(
-                                "The Accuracy is ${confidence.toStringAsFixed(0)}%",
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 12,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (filePath != null)
+              Container(
+                width: double.infinity,
+                height: 300,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  image: DecorationImage(
+                    image: FileImage(filePath!),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
+            else
+              Container(
+                width: double.infinity,
+                height: 300,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(15),
+                  image: const DecorationImage(
+                    image: AssetImage('assets/upload.jpg'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    "No image selected",
+                    style: TextStyle(
+                      color: Colors.grey[800],
+                      fontSize: 18,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 8,
-              ),
-              ElevatedButton(
-                onPressed: pickImageCamera,
-                style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(13),
+            const SizedBox(height: 20),
+            if (label.isNotEmpty)
+              Column(
+                children: [
+                  Text(
+                    "Label: $label",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
-                    foregroundColor: Colors.black),
-                child: const Text(
-                  "Take a Photo",
-                ),
-              ),
-              const SizedBox(
-                height: 8,
-              ),
-              ElevatedButton(
-                onPressed: pickImageGallery,
-                style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(13),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Confidence: ${confidence.toStringAsFixed(2)}%",
+                    style: TextStyle(
+                      fontSize: 18,
                     ),
-                    foregroundColor: Colors.black),
-                child: const Text(
-                  "Pick from gallery",
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            const SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => _pickImage(ImageSource.camera),
+                  icon: const Icon(Icons.camera_alt),
+                  label: const Text("Camera"),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 15,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _pickImage(ImageSource.gallery),
+                  icon: const Icon(Icons.photo),
+                  label: const Text("Gallery"),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 15,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

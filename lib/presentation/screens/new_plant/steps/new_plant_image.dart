@@ -8,12 +8,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
 
 
-import '../../../../data/models/themes_model.dart';
-import '../../../../data/providers/theme_provider.dart';
-import '../../../../logic/image_picker/image_picker.dart';
-import '../../../../logic/localization/localization_handler.dart';
-import '../../../widgets/buttons/appbar_leading_button.dart';
-import '../../../widgets/elevated_notification.dart';
+import 'package:my_tflit_app/data/models/themes_model.dart';
+import 'package:my_tflit_app/data/providers/theme_provider.dart';
+import 'package:my_tflit_app/logic/image_picker/image_picker.dart';
+import 'package:my_tflit_app/logic/localization/localization_handler.dart';
+import 'package:my_tflit_app/presentation/widgets/elevated_notification.dart';
+import 'package:my_tflit_app/presentation/widgets/buttons/appbar_leading_button.dart';
 import 'new_pnat_name.dart';
 
 class AddNewPlantImage extends ConsumerWidget {
