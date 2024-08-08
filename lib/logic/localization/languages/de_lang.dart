@@ -10,7 +10,7 @@ const de = {
   "settings_current_version":
   "Aktuell verwendete Version %version%\n(auf %platform% ausgeführt)",
   "journal": "Journal",
-  "journal_title": "Dein persönliches Journal",
+  "journal_title":"Dein persönliches Journal",
   "journal_take_notes": "Notizen machen...",
   "journal_disclaimer":
   "Stelle sicher, dass du Änderungen speicherst. Zurück zum Dashboard gehen speichert aktuelle Modifikationen nicht.",

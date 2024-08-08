@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_tflite/flutter_tflite.dart'; // Ensure Tflite is correctly imported
+import 'package:flutter_tflite/flutter_tflite.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:developer' as devtools;
+
+import 'package:lottie/lottie.dart';
 
 class LeafScanner extends StatefulWidget {
   const LeafScanner({super.key});
@@ -25,7 +28,7 @@ class _LeafScannerState extends State<LeafScanner> {
   Future<void> _initializeTfLite() async {
     try {
       await Tflite.loadModel(
-        model: "assets/internml.tflite",
+        model: "assets/model_unquant.tflite",
         labels: "assets/labels.txt",
         numThreads: 1,
         isAsset: true,
@@ -87,103 +90,125 @@ class _LeafScannerState extends State<LeafScanner> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Leaf Scan"),
+        title: Text(
+          "Leaf Scan",
+          style: GoogleFonts.rubik(
+            fontSize: 16,
+          ),
+        ),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (filePath != null)
-              Container(
-                width: double.infinity,
-                height: 300,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  image: DecorationImage(
-                    image: FileImage(filePath!),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              )
-            else
-              Container(
-                width: double.infinity,
-                height: 300,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(15),
-                  image: const DecorationImage(
-                    image: AssetImage('assets/upload.jpg'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    "No image selected",
-                    style: TextStyle(
-                      color: Colors.grey[800],
-                      fontSize: 18,
-                    ),
-                  ),
-                ),
-              ),
-            const SizedBox(height: 20),
-            if (label.isNotEmpty)
-              Column(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
                 children: [
-                  Text(
-                    "Label: $label",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  // Conditionally render Lottie animation or selected image
+                  if (filePath == null)
+                    Column(
+                      children: [
+                        // Lottie animation for taking a picture
+                        Lottie.asset("assets/animations/taking_a_picture.json",
+                            width: 128, height: 128),
+                        const SizedBox(height: 20),
+                        Column(
+                          children: [
+                            Text(
+                              "Choose a picture",
+                              style: GoogleFonts.openSans(
+                                fontSize: 18,
+                              ),
+                            ),
+                            Text(
+                              "Select an image from your gallery or take a new picture",
+                              style: GoogleFonts.openSans(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: MediaQuery.of(context).size.width - 50,
+                          height: 4,
+                          color: Colors.grey,
+                        ),
+                      ],
+                    )
+                  else
+                    Column(
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          height: 300,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            image: DecorationImage(
+                              image: FileImage(filePath!),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        if (label.isNotEmpty)
+                          Column(
+                            children: [
+                              Text(
+                                "Label: $label",
+                                style: GoogleFonts.openSans(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                "Confidence: ${confidence.toStringAsFixed(2)}%",
+                                style: GoogleFonts.openSans(
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                        const SizedBox(height: 30),
+                      ],
                     ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () => _pickImage(ImageSource.camera),
+                        icon: const Icon(Icons.camera_alt),
+                        label: Text(
+                          "Camera",
+                          style: GoogleFonts.openSans(),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.all(12.0),
+                          backgroundColor: Colors.blueAccent,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton.icon(
+                        onPressed: () => _pickImage(ImageSource.gallery),
+                        icon: const Icon(Icons.photo),
+                        label: Text(
+                          "Gallery",
+                          style: GoogleFonts.openSans(),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.all(12.0),
+                          backgroundColor: Colors.blueAccent,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "Confidence: ${confidence.toStringAsFixed(2)}%",
-                    style: TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
-            const SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () => _pickImage(ImageSource.camera),
-                  icon: const Icon(Icons.camera_alt),
-                  label: const Text("Camera"),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 30,
-                      vertical: 15,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => _pickImage(ImageSource.gallery),
-                  icon: const Icon(Icons.photo),
-                  label: const Text("Gallery"),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 30,
-                      vertical: 15,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ],
             ),
-          ],
+          ),
         ),
       ),
     );

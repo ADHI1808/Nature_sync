@@ -1,2 +1,5 @@
-train_deseased
-train_healthy
+Healthy
+Powdery mildew
+Pyricularia grisea
+Puccinia sorghi
+Blight
