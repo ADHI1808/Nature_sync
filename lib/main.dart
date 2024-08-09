@@ -20,6 +20,7 @@ void main() async {
   // Opening the databases
   await Hive.openBox('plants');
   await Hive.openBox('settings');
+  await Hive.openBox('scoreBox');
 
   runApp(const ProviderScope(child: my_tflite_app()));
 }
