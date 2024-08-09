@@ -153,7 +153,7 @@ class _LeafScannerState extends State<LeafScanner> {
                           Column(
                             children: [
                               Text(
-                                "Label: $label",
+                                "Condition: $label",
                                 style: GoogleFonts.openSans(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
