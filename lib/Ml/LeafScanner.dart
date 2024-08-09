@@ -153,7 +153,7 @@ class _LeafScannerState extends State<LeafScanner> {
                           Column(
                             children: [
                               Text(
-                                "Condition: $label",
+                                "Label: $label",
                                 style: GoogleFonts.openSans(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -180,7 +180,7 @@ class _LeafScannerState extends State<LeafScanner> {
                           ),
                         const SizedBox(height: 30),
                       ],
-                    ),SizedBox(height: 15,),
+                    ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
