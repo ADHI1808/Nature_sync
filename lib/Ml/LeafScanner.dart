@@ -160,12 +160,6 @@ class _LeafScannerState extends State<LeafScanner> {
                                 ),
                               ),
                               const SizedBox(height: 10),
-                              Text(
-                                "Confidence: ${confidence.toStringAsFixed(2)}%",
-                                style: GoogleFonts.openSans(
-                                  fontSize: 18,
-                                ),
-                              ),
                               const SizedBox(height: 20),
                               if (label == "Healthy")
                                 _buildHealthTips(),
@@ -181,6 +175,7 @@ class _LeafScannerState extends State<LeafScanner> {
                         const SizedBox(height: 30),
                       ],
                     ),
+                  SizedBox(height: 15),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

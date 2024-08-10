@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart'; // Import Hive
-
+import 'package:hive_flutter/hive_flutter.dart';
 import '../../../data/models/themes_model.dart';
 import '../../../data/providers/theme_provider.dart';
 import '../../../logic/localization/localization_handler.dart';
