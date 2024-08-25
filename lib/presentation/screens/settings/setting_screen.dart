@@ -15,6 +15,10 @@ import 'package:my_tflit_app/logic/localization/providers/language_provider.dart
 import 'package:my_tflit_app/presentation/themes/dark_theme.dart';
 import 'package:my_tflit_app/presentation/themes/light_theme.dart';
 import 'package:my_tflit_app/presentation/widgets/buttons/appbar_leading_button.dart';
+import 'dart:io';
+
+import 'package:weather/weather.dart';
+
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -243,30 +247,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Container(
-                  width: MediaQuery.of(context).size.width - 32,
-                  decoration: BoxDecoration(
-                    color: theme.secondaryColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: TextField(
-                    controller: openAIKeyController,
-                    maxLines: 1,
-                    maxLength: 128,
-                    obscureText: true,
-                    style: TextStyle(color: theme.textColor),
-                    decoration: InputDecoration(
-                      hintText: "OpenAI Key",
-                      hintStyle: TextStyle(color: theme.textColor),
-                      contentPadding: const EdgeInsets.all(8.0),
-                      border: InputBorder.none,
-                      counterText: "",
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      localizationHandler.getMessage(
+                          ref, "settings_provide_key"),
+                      style: GoogleFonts.openSans(
+                        color: theme.textColor,
+                        fontSize: 13,
+                      ),
                     ),
-                    cursorColor: theme.primaryColor,
-                    textAlignVertical: TextAlignVertical.top,
-                    onChanged: (key) =>
-                        settingsHandler.setValue('openai_key', key),
-                  ),
+                    const SizedBox(height: 4),
+                    Container(
+                      width: MediaQuery.of(context).size.width - 32,
+                      decoration: BoxDecoration(
+                        color: theme.secondaryColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: TextField(
+                        controller: openAIKeyController,
+                        maxLines: 1,
+                        maxLength: 128,
+                        obscureText: true,
+                        style: TextStyle(color: theme.textColor),
+                        decoration: InputDecoration(
+                          hintText: "OpenAI Key",
+                          hintStyle: TextStyle(color: theme.textColor),
+                          contentPadding: const EdgeInsets.all(8.0),
+                          border: InputBorder.none,
+                          counterText: "",
+                        ),
+                        cursorColor: theme.primaryColor,
+                        textAlignVertical: TextAlignVertical.top,
+                        onChanged: (key) =>
+                            settingsHandler.setValue('openai_key', key),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -287,7 +305,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               "${_weather!.areaName}",
@@ -298,7 +317,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               ),
                             ),
                             Text(
-                              DateFormat.yMMMd().format(_weather!.date!),
+                              DateFormat.yMMMd()
+                                  .format(_weather!.date!),
                               style: GoogleFonts.openSans(
                                 color: theme.textColor,
                                 fontSize: 14,
@@ -316,7 +336,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                             const SizedBox(width: 16),
                             Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   "${_weather!.temperature!.celsius!.toStringAsFixed(1)}°C",
@@ -326,9 +347,62 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.opacity,
+                                        color: theme.textColor, size: 18),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "Humidity: ${_weather!.humidity}%",
+                                      style: GoogleFonts.openSans(
+                                        color: theme.textColor,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                                 const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(Icons.air,
+                                        color: theme.textColor, size: 18),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "Wind Speed: ${_weather!.windSpeed} m/s",
+                                      style: GoogleFonts.openSans(
+                                        color: theme.textColor,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [ Text(
+                                "${_weather!.weatherDescription}",
+                                style: GoogleFonts.openSans(
+                                  color: theme.textColor,
+                                  fontSize: 14,
+                                ),
+                              ),
                                 Text(
-                                  "${_weather!.weatherDescription}",
+                                  "Feels Like: ${_weather!.tempFeelsLike!.celsius!.toStringAsFixed(1)}°C",
                                   style: GoogleFonts.openSans(
                                     color: theme.textColor,
                                     fontSize: 14,
@@ -338,33 +412,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Humidity: ${_weather!.humidity}%",
-                              style: GoogleFonts.openSans(
-                                color: theme.textColor,
-                                fontSize: 14,
-                              ),
-                            ),
-                            Text(
-                              "Wind: ${_weather!.windSpeed} m/s",
-                              style: GoogleFonts.openSans(
-                                color: theme.textColor,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
                 ),
               )
-                  : CircularProgressIndicator(
-                color: theme.primaryColor,
+                  : const Center(
+                child: CircularProgressIndicator(),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Application Version
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  localizationHandler
+                      .getMessage(ref, "settings_current_version")
+                      .replaceAll("%version%", applicationVersion)
+                      .replaceAll("%platform%", Platform.operatingSystem),
+                  style: GoogleFonts.openSans(
+                    color: theme.textColor,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ],
           ),
