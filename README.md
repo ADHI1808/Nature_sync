@@ -7,3 +7,5 @@ But NatureSync is more than just a monitoring tool. The app also shares useful t
 **✨ New Feature ✨**
 
 Machine learning has been successfully integrated into NatureSync using TensorFlow Lite (tflite). This new feature allows the app to detect whether a leaf is healthy or diseased, providing you with more precise care recommendations for your plants🧠🌱.
+
+https://github.com/user-attachments/assets/3d028ff1-2beb-440b-a1ff-3e3f50d4382d
